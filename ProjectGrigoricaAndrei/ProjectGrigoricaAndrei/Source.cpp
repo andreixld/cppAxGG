@@ -3,70 +3,71 @@
 
 using namespace std;
 
-class EventLocation {
+class Location {
 private:
     string venueName;
-    string city;
-    string country;
+    int maxSeats;
+    int numRows;
+    int numSeatsPerRow;
 
 public:
-    EventLocation(const string& name, const string& city, const string& country)
-        : venueName(name), city(city), country(country) {}
+    Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow);
+    Location(const Location& other);
+    ~Location();
 
-    string getVenueName() const {
-        return venueName;
-    }
+    
+    void setVenueName(const string& name);
+    void setMaxSeats(int seats);
+    void setNumRows(int rows);
+    void setNumSeatsPerRow(int seatsPerRow);
 
-    string getCity() const {
-        return city;
-    }
+    
+    string getVenueName() const;
+    int getMaxSeats() const;
+    int getNumRows() const;
+    int getNumSeatsPerRow() const;
 
-    string getCountry() const {
-        return country;
-    }
-
-    void displayLocationInfo() const {
-        cout << "Venue: " << venueName << "\nCity: " << city << "\nCountry: " << country << "\n";
-    }
+    
+    void displayLocationInfo() const;
 };
 
-class FootballMatch {
-private:
-    EventLocation eventLocation;
-
-public:
-    FootballMatch(const string& venue, const string& city, const string& country)
-        : eventLocation(venue, city, country) {}
-
-    void readEventLocation() {
-        string venue, city, country;
-
-        cout << "Enter venue name: ";
-        getline(cin, venue);
-
-        cout << "Enter city: ";
-        getline(cin, city);
-
-        cout << "Enter country: ";
-        getline(cin, country);
-
-        eventLocation = EventLocation(venue, city, country);
-    }
-
-    void displayMatchInfo() const {
-        cout << "Football Match Information:\n";
-        eventLocation.displayLocationInfo();
-    }
-};
+//class FootballMatch {
+//private:
+//    EventLocation eventLocation;
+//
+//public:
+//    FootballMatch(const string& venue, const string& city, const string& country)
+//        : eventLocation(venue, city, country) {}
+//
+//    void readEventLocation() {
+//        string venue, city, country;
+//
+//        cout << "Enter venue name: ";
+//        getline(cin, venue);
+//
+//        cout << "Enter city: ";
+//        getline(cin, city);
+//
+//        cout << "Enter country: ";
+//        getline(cin, country);
+//
+//        eventLocation = EventLocation(venue, city, country);
+//    }
+//
+//    void displayMatchInfo() const {
+//        cout << "Football Match Information:\n";
+//        eventLocation.displayLocationInfo();
+//    }
+//};
 
 int main() {
-    FootballMatch myMatch("Stadium A", "City X", "Country Y");
+    //FootballMatch myMatch("Stadium A", "City X", "Country Y");
 
-    myMatch.displayMatchInfo();
+    //myMatch.displayMatchInfo();
 
-    myMatch.readEventLocation();
+    //myMatch.readEventLocation();
 
-    myMatch.displayMatchInfo();
+    //myMatch.displayMatchInfo();
 
     return 0;
 }
