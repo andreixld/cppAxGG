@@ -31,43 +31,36 @@ public:
     void displayLocationInfo() const;
 };
 
-//class FootballMatch {
-//private:
-//    EventLocation eventLocation;
-//
-//public:
-//    FootballMatch(const string& venue, const string& city, const string& country)
-//        : eventLocation(venue, city, country) {}
-//
-//    void readEventLocation() {
-//        string venue, city, country;
-//
-//        cout << "Enter venue name: ";
-//        getline(cin, venue);
-//
-//        cout << "Enter city: ";
-//        getline(cin, city);
-//
-//        cout << "Enter country: ";
-//        getline(cin, country);
-//
-//        eventLocation = EventLocation(venue, city, country);
-//    }
-//
-//    void displayMatchInfo() const {
-//        cout << "Football Match Information:\n";
-//        eventLocation.displayLocationInfo();
-//    }
-//};
+class Event {
+private:
+    string eventName;
+    string eventDate;
+    string eventTime;
+
+public:
+    static const int MAX_EVENT_NAME_LENGTH = 50;
+
+    Event(const string& name, const string& date, const string& time);
+    Event(const Event& other);
+    ~Event();
+
+    // Setter methods with input validation
+    void setEventName(const string& name);
+    void setEventDate(const string& date);
+    void setEventTime(const string& time);
+
+    // Accessor methods
+    string getEventName() const;
+    string getEventDate() const;
+    string getEventTime() const;
+
+    // Generic methods for processing/displaying attributes
+    void displayEventInfo() const;
+};
+
+
 
 int main() {
-    //FootballMatch myMatch("Stadium A", "City X", "Country Y");
-
-    //myMatch.displayMatchInfo();
-
-    //myMatch.readEventLocation();
-
-    //myMatch.displayMatchInfo();
 
     return 0;
 }
