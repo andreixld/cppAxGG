@@ -44,21 +44,58 @@ public:
     Event(const Event& other);
     ~Event();
 
-    // Setter methods with input validation
     void setEventName(const string& name);
     void setEventDate(const string& date);
     void setEventTime(const string& time);
 
-    // Accessor methods
     string getEventName() const;
     string getEventDate() const;
     string getEventTime() const;
 
-    // Generic methods for processing/displaying attributes
     void displayEventInfo() const;
 };
 
+// Implementation of Event class
+Event::Event(const string& name, const string& date, const string& time)
+    : eventName(name), eventDate(date), eventTime(time) {}
 
+Event::Event(const Event& other)
+    : eventName(other.eventName), eventDate(other.eventDate), eventTime(other.eventTime) {}
+
+Event::~Event() {}
+
+void Event::setEventName(const string& name) {
+    if (name.length() <= MAX_EVENT_NAME_LENGTH) {
+        eventName = name;
+    }
+    else {
+        throw invalid_argument("Event name exceeds maximum length.");
+    }
+}
+
+void Event::setEventDate(const string& date) {
+    eventDate = date;
+}
+
+void Event::setEventTime(const string& time) {
+    eventTime = time;
+}
+
+string Event::getEventName() const {
+    return eventName;
+}
+
+string Event::getEventDate() const {
+    return eventDate;
+}
+
+string Event::getEventTime() const {
+    return eventTime;
+}
+
+void Event::displayEventInfo() const {
+    cout << "Event Name: " << eventName << "\nDate: " << eventDate << "\nTime: " << eventTime << "\n";
+}
 
 int main() {
 
