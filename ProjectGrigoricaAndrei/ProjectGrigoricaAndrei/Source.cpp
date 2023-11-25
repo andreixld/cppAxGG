@@ -55,6 +55,67 @@ public:
     void displayEventInfo() const;
 };
 
+// Implementation of Location class
+Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow)
+    : venueName(name), maxSeats(maxSeats), numRows(numRows), numSeatsPerRow(numSeatsPerRow) {}
+
+Location::Location(const Location& other)
+    : venueName(other.venueName), maxSeats(other.maxSeats), numRows(other.numRows), numSeatsPerRow(other.numSeatsPerRow) {}
+
+Location::~Location() {}
+
+void Location::setVenueName(const string& name) {
+    venueName = name;
+}
+
+void Location::setMaxSeats(int seats) {
+    if (seats > 0) {
+        maxSeats = seats;
+    }
+    else {
+        throw invalid_argument("Invalid value for max seats.");
+    }
+}
+
+void Location::setNumRows(int rows) {
+    if (rows > 0) {
+        numRows = rows;
+    }
+    else {
+        throw invalid_argument("Invalid value for number of rows.");
+    }
+}
+
+void Location::setNumSeatsPerRow(int seatsPerRow) {
+    if (seatsPerRow > 0) {
+        numSeatsPerRow = seatsPerRow;
+    }
+    else {
+        throw invalid_argument("Invalid value for seats per row.");
+    }
+}
+
+string Location::getVenueName() const {
+    return venueName;
+}
+
+int Location::getMaxSeats() const {
+    return maxSeats;
+}
+
+int Location::getNumRows() const {
+    return numRows;
+}
+
+int Location::getNumSeatsPerRow() const {
+    return numSeatsPerRow;
+}
+
+void Location::displayLocationInfo() const {
+    cout << "Venue: " << venueName << "\nMax Seats: " << maxSeats << "\nNumber of Rows: " << numRows
+        << "\nSeats Per Row: " << numSeatsPerRow << "\n";
+}
+
 // Implementation of Event class
 Event::Event(const string& name, const string& date, const string& time)
     : eventName(name), eventDate(date), eventTime(time) {}
