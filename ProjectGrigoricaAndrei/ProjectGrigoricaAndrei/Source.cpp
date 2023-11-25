@@ -98,6 +98,12 @@ void Event::displayEventInfo() const {
 }
 
 int main() {
+    srand(time(0));
 
+    Location myLocation("Stadium A", 500, 10, 50);
+    Event myEvent("Football Match", "2023-12-01", "18:00");
+
+    myLocation.displayLocationInfo();
+    myEvent.displayEventInfo();
     return 0;
 }
