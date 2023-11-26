@@ -6,6 +6,8 @@
 
 using namespace std;
 
+
+
 class Location {
 private:
     string venueName;
@@ -34,7 +36,10 @@ public:
     void setDefaultTicketType(const string& defaultType);
     void setDefaultTicketPrice(double defaultPrice);
     void setVenueDescription(const string& description);
-    void addToNumericalVector(int value);;
+    void addToNumericalVector(int value);
+    string getVenueDescription() const;
+    void displaySeatingPlan() const;
+
 
     string getVenueName() const;
     int getMaxSeats() const;
@@ -174,8 +179,27 @@ istream& operator>>(istream& is, Location& location) {
     cout << "Enter venue name: ";
     is >> location.venueName;
 
+    cout << "Enter maximum seats: ";
+    is >> location.maxSeats;
+
+    cout << "Enter number of rows: ";
+    is >> location.numRows;
+
+    cout << "Enter seats per row: ";
+    is >> location.numSeatsPerRow;
+
+    cout << "Enter default ticket type: ";
+    is >> location.defaultTicketType;
+
+    cout << "Enter default ticket price: ";
+    is >> location.defaultTicketPrice;
+
+    cout << "Enter venue description: ";
+    is.ignore();
+
     return is;
 }
+
 
 Location& Location::operator=(const Location& other) {
     if (this != &other) {
@@ -253,7 +277,7 @@ private:
     string eventName;
     string eventDate;
     string eventTime;
-    string* eventDescription;  // Pointer
+    string* eventDescription;
     static const int staticArraySize = 5;
     int staticArray[staticArraySize];
     vector<int> numericalVector;
@@ -263,6 +287,10 @@ public:
 
     Event(const string& name, const string& date, const string& time);
     Event(const Event& other);
+
+    Event()
+        : eventName(""), eventDate(""), eventTime(""), eventDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {}
+    
     ~Event();
 
 
@@ -272,7 +300,7 @@ public:
     void setEventDescription(const string& description);
     void addToNumericalVector(int value);
 
-
+    string getEventDescription() const;
     string getEventName() const;
     string getEventDate() const;
     string getEventTime() const;
@@ -471,18 +499,26 @@ private:
     static const int staticArraySize = 5;
     int staticArray[staticArraySize];
     vector<int> numericalVector;
+    int generateTicketID();
+
 
 public:
 
     Ticket(const string& type, double price);
     Ticket(const Ticket& other);
+
+    Ticket()
+        : ticketID(generateTicketID()), ticketType(""), ticketPrice(0.0), isBooked(false),
+        ticketDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {}
+
     ~Ticket();
 
-
+    void setTicketID(int id);
     void setTicketType(const string& type);
     void setTicketPrice(double price);
     void bookTicket();
-    void setTicketDescription(const string& description);  
+    void setTicketDescription(const string& description); 
+
 
 
     int getTicketID() const;
@@ -556,6 +592,15 @@ string Ticket::getTicketType() const {
 
 double Ticket::getTicketPrice() const {
     return ticketPrice;
+}
+
+void Ticket::setTicketID(int id) {
+    if (id >= 0) {
+        ticketID = id;
+    }
+    else {
+        throw invalid_argument("Invalid value for ticket ID.");
+    }
 }
 
 bool Ticket::isTicketBooked() const {
@@ -690,12 +735,155 @@ istream& operator>>(istream& is, Ticket& ticket) {
         ticket.numericalVector.push_back(value);
     }
 
+    ticket.ticketID = ticket.generateTicketID();
+    cout << "Ticket ID: " << ticket.getTicketID() << "\n";
+
     return is;
 }
 
+int Ticket::generateTicketID() {
+    return ++ticketIDCounter;
+}
+
+// Function to generate a random ticket ID
+int generateRandomTicketID() {
+    static bool seedInitialized = false;
+    if (!seedInitialized) {
+        srand(static_cast<unsigned>(time(nullptr)));
+        seedInitialized = true;
+    }
+    return rand();
+}
+
+Location enterLocationDetails() {
+    Location location;
+    cin >> location;
+    return location;
+}
+
+Event enterEventDetails() {
+    Event event;
+    cin >> event;
+    return event;
+}
+
+Ticket generateNominalTicket(const Location& location, const Event& event) {
+    Ticket ticket;
+
+    cout << "Available ticket types:\n1. VIP\n2. Regular\n";
+    int ticketTypeChoice;
+    cout << "Enter your choice (1 or 2): ";
+    cin >> ticketTypeChoice;
+
+    switch (ticketTypeChoice) {
+    case 1:
+        ticket.setTicketType("VIP");
+        ticket.setTicketPrice(100.0); 
+        break;
+    case 2:
+        ticket.setTicketType("Regular");
+        ticket.setTicketPrice(30.0); 
+        break;
+    default:
+        cout << "Invalid choice for ticket type. Generating a default Regular ticket.\n";
+        ticket.setTicketType("Regular");
+        ticket.setTicketPrice(30.0);
+    }
+
+    ticket.setTicketID(generateRandomTicketID());
+
+    return ticket;
+}
+
+
+bool validateTicket(const Ticket& ticket) {
+    // ticket is considered balid if it is vip (for now)
+    return ticket.getTicketType() == "VIP";
+}
 
 //-----------------------------------------------------------------------------------
 
 int main() {
-    
+    Location location;
+    Event event;
+
+    int choice;
+    do {
+        cout << "1. Enter location details\n"
+            << "2. Enter event details\n"
+            << "3. Generate nominal ticket\n"
+            << "4. Validate ticket\n"
+            << "5. Exit\n\n";
+            
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+        {location = enterLocationDetails();
+        break; }
+        case 2:
+        { event = enterEventDetails();
+        break; }
+        case 3:
+        { 
+            if (!location || !event) {
+            cout << "Please enter location and event details before generating a ticket.\n";
+            break;
+            }
+            Ticket ticket = generateNominalTicket(location, event);
+            cout << "Generated Ticket:\n";
+            ticket.displayTicketInfo();
+            break; 
+        }
+        case 4:
+        {
+            if (!location || !event) {
+            cout << "Please enter location and event details before validating a ticket.\n";
+            break;
+            }
+            Ticket ticketToValidate;
+            cin >> ticketToValidate;
+            if (validateTicket(ticketToValidate)) {
+                cout << "Ticket is valid.\n";
+            }
+            else {
+                cout << "Ticket is not valid.\n";
+            }
+        break; 
+        }
+        case 5:
+        { cout << "Exiting the program.\n";
+        break; }
+        /*case 6:
+        { 
+            if (location)
+                cout << location;
+            else {
+                cout << "There is no location";
+            }
+            break;
+        }
+        case 7:
+        {
+            if (event)
+                cout << event;
+            else {
+                cout << "There is no event";
+            }
+            break;
+        }*/
+        
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+
+
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    } while (choice != 5);
+
+    return 0;
 }
+
