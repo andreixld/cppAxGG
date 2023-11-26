@@ -1,8 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <vector>
 #include <string>
-#include <ctime>
-#include <cstdlib>
 
 using namespace std;
 
@@ -14,6 +14,10 @@ private:
     int numSeatsPerRow;
     string defaultTicketType;
     double defaultTicketPrice;
+    string* venueDescription;
+    static const int staticArraySize = 5;
+    int staticArray[staticArraySize];
+    vector<int> numericalVector;
 
 public:
     Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow);
@@ -22,87 +26,35 @@ public:
     Location(const Location& other);
     ~Location();
 
-    // Setter methods with input validation
+
     void setVenueName(const string& name);
     void setMaxSeats(int seats);
     void setNumRows(int rows);
     void setNumSeatsPerRow(int seatsPerRow);
     void setDefaultTicketType(const string& defaultType);
     void setDefaultTicketPrice(double defaultPrice);
+    void setVenueDescription(const string& description);
+    void addToNumericalVector(int value);;
 
-    // Accessor methods
     string getVenueName() const;
     int getMaxSeats() const;
     int getNumRows() const;
     int getNumSeatsPerRow() const;
 
-    // Generic methods for processing/displaying attributes
+    friend ostream& operator<<(ostream& os, const Location& location);
+    friend istream& operator>>(istream& is, Location& location);
+    Location& operator=(const Location& other);
+    int operator[](int index) const;
+    Location operator+(const Location& other) const;
+    Location& operator++();
+    Location operator++(int);
+    explicit operator bool() const;
+    bool operator!() const;
+    bool operator<(const Location& other) const;
+    bool operator==(const Location& other) const;
+
     void displayLocationInfo() const;
 };
-
-class Event {
-private:
-    string eventName;
-    string eventDate;
-    string eventTime;
-
-public:
-    static const int MAX_EVENT_NAME_LENGTH = 50;
-
-    Event(const string& name, const string& date, const string& time);
-    Event(const Event& other);
-    ~Event();
-
-    // Setter methods with input validation
-    void setEventName(const string& name);
-    void setEventDate(const string& date);
-    void setEventTime(const string& time);
-
-    // Accessor methods
-    string getEventName() const;
-    string getEventDate() const;
-    string getEventTime() const;
-
-    // Generic methods for processing/displaying attributes
-    void displayEventInfo() const;
-};
-
-class Ticket {
-private:
-    static int ticketIDCounter;
-    int ticketID;
-    string ticketType;
-    double ticketPrice;
-    bool isBooked;
-
-public:
-    Ticket(const string& type, double price);
-    Ticket(const Ticket& other);
-    ~Ticket();
-
-    // Setter methods with input validation
-    void setTicketType(const string& type);
-    void setTicketPrice(double price);
-    void bookTicket();
-
-    // Accessor methods
-    int getTicketID() const;
-    string getTicketType() const;
-    double getTicketPrice() const;
-    bool isTicketBooked() const;
-
-    // Generic methods for processing/displaying attributes
-    void displayTicketInfo() const;
-
-    // Overloaded operators
-    Ticket& operator=(const Ticket& other);
-    friend ostream& operator<<(ostream& os, const Ticket& ticket);
-    friend istream& operator>>(istream& is, Ticket& ticket);
-    bool operator==(const Ticket& other) const;
-};
-
-// Initialize static member
-int Ticket::ticketIDCounter = 1000;
 
 // Implementation of Location class
 Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow)
@@ -111,7 +63,7 @@ Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPe
 Location::Location(const Location& other)
     : venueName(other.venueName), maxSeats(other.maxSeats), numRows(other.numRows), numSeatsPerRow(other.numSeatsPerRow) {}
 
-Location::~Location() {}
+
 
 void Location::setVenueName(const string& name) {
     venueName = name;
@@ -165,11 +117,19 @@ void Location::displayLocationInfo() const {
         << "\nSeats Per Row: " << numSeatsPerRow << "\n";
 }
 
-Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow, const string& defaultType, double defaultPrice)
-    : venueName(name), maxSeats(maxSeats), numRows(numRows), numSeatsPerRow(numSeatsPerRow), defaultTicketType(defaultType), defaultTicketPrice(defaultPrice) {}
+Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow,
+    const string& defaultType, double defaultPrice)
+    : venueName(name), maxSeats(maxSeats), numRows(numRows), numSeatsPerRow(numSeatsPerRow),
+    venueDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {
+    setDefaultTicketType(defaultType);
+    setDefaultTicketPrice(defaultPrice);
+}
 
 Location::Location()
-    : maxSeats(0), numRows(0), numSeatsPerRow(0), defaultTicketType("Regular"), defaultTicketPrice(30.0) {}
+    : maxSeats(0), numRows(0), numSeatsPerRow(0), venueDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {
+    setDefaultTicketType("Regular");
+    setDefaultTicketPrice(30.0);
+}
 
 void Location::setDefaultTicketType(const string& defaultType) {
     defaultTicketType = defaultType;
@@ -184,14 +144,184 @@ void Location::setDefaultTicketPrice(double defaultPrice) {
     }
 }
 
+void Location::setVenueDescription(const string& description) {
+    if (venueDescription == nullptr) {
+        venueDescription = new string(description);
+    }
+    else {
+        *venueDescription = description;
+    }
+}
+
+void Location::addToNumericalVector(int value) {
+    numericalVector.push_back(value);
+}
+
+Location::~Location() {
+    delete venueDescription;
+}
+
+
+
+ostream& operator<<(ostream& os, const Location& location) {
+    os << "Venue: " << location.venueName << "\nMax Seats: " << location.maxSeats << "\nNumber of Rows: "
+        << location.numRows << "\nSeats Per Row: " << location.numSeatsPerRow << "\n";
+
+    return os;
+}
+
+istream& operator>>(istream& is, Location& location) {
+    cout << "Enter venue name: ";
+    is >> location.venueName;
+
+    return is;
+}
+
+Location& Location::operator=(const Location& other) {
+    if (this != &other) {
+        venueName = other.venueName;
+        maxSeats = other.maxSeats;
+        numRows = other.numRows;
+        numSeatsPerRow = other.numSeatsPerRow;
+
+    }
+    return *this;
+}
+
+int Location::operator[](int index) const {
+    if (index >= 0 && index < numericalVector.size()) {
+        return numericalVector[index];
+    }
+    else {
+        throw out_of_range("Index out of range.");
+    }
+}
+
+Location Location::operator+(const Location& other) const {
+    Location result = *this;
+
+    return result;
+}
+
+Location& Location::operator++() {
+
+    ++maxSeats;
+    ++numRows;
+    ++numSeatsPerRow;
+
+    return *this;
+}
+
+
+Location Location::operator++(int) {
+    Location temp = *this;  
+
+    maxSeats++;
+    numRows++;
+    numSeatsPerRow++;
+
+    return temp;  
+}
+
+
+Location::operator bool() const {
+    return maxSeats > 0 && numRows > 0 && numSeatsPerRow > 0;  
+}
+
+
+bool Location::operator!() const {
+    return !(maxSeats > 0 && numRows > 0 && numSeatsPerRow > 0);  
+}
+
+
+bool Location::operator<(const Location& other) const {
+    return (maxSeats * numRows) < (other.maxSeats * other.numRows);
+}
+
+
+bool Location::operator==(const Location& other) const {
+    return venueName == other.venueName && maxSeats == other.maxSeats &&
+        numRows == other.numRows && numSeatsPerRow == other.numSeatsPerRow;
+
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+class Event {
+private:
+    string eventName;
+    string eventDate;
+    string eventTime;
+    string* eventDescription;  // Pointer
+    static const int staticArraySize = 5;
+    int staticArray[staticArraySize];
+    vector<int> numericalVector;
+
+public:
+    static const int MAX_EVENT_NAME_LENGTH = 50;
+
+    Event(const string& name, const string& date, const string& time);
+    Event(const Event& other);
+    ~Event();
+
+
+    void setEventName(const string& name);
+    void setEventDate(const string& date);
+    void setEventTime(const string& time);
+    void setEventDescription(const string& description);
+    void addToNumericalVector(int value);
+
+
+    string getEventName() const;
+    string getEventDate() const;
+    string getEventTime() const;
+
+
+    friend ostream& operator<<(ostream& os, const Event& event);
+    friend istream& operator>>(istream& is, Event& event);
+    Event& operator=(const Event& other);
+    int operator[](int index) const;
+    Event operator+(const Event& other) const;
+    Event& operator++();
+    Event operator++(int);
+    explicit operator bool() const;
+    bool operator!() const;
+    bool operator<(const Event& other) const;
+    bool operator==(const Event& other) const;
+
+
+    void displayEventInfo() const;
+};
+
 // Implementation of Event class
 Event::Event(const string& name, const string& date, const string& time)
-    : eventName(name), eventDate(date), eventTime(time) {}
+    : eventName(name), eventDate(date), eventTime(time), eventDescription(nullptr),
+    staticArray{ 1, 2, 3, 4, 5 } {}
 
 Event::Event(const Event& other)
-    : eventName(other.eventName), eventDate(other.eventDate), eventTime(other.eventTime) {}
+    : eventName(other.eventName), eventDate(other.eventDate), eventTime(other.eventTime),
+    eventDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {
+    setEventDescription(other.eventDescription ? *other.eventDescription : "");
+    numericalVector = other.numericalVector;
+}
 
-Event::~Event() {}
+void Event::setEventDescription(const string& description) {
+    if (eventDescription == nullptr) {
+        eventDescription = new string(description);
+    }
+    else {
+        *eventDescription = description;
+    }
+}
+
+void Event::addToNumericalVector(int value) {
+    numericalVector.push_back(value);
+}
+
+Event::~Event() {
+    delete eventDescription;
+}
 
 void Event::setEventName(const string& name) {
     if (name.length() <= MAX_EVENT_NAME_LENGTH) {
@@ -224,16 +354,180 @@ string Event::getEventTime() const {
 
 void Event::displayEventInfo() const {
     cout << "Event Name: " << eventName << "\nDate: " << eventDate << "\nTime: " << eventTime << "\n";
+    if (eventDescription != nullptr) {
+        cout << "Description: " << *eventDescription << "\n";
+    }
+    cout << "Static Array: [";
+    for (int i = 0; i < staticArraySize; ++i) {
+        cout << staticArray[i] << (i == staticArraySize - 1 ? "" : ", ");
+    }
+    cout << "]\n";
+
+    cout << "Numerical Vector: [";
+    for (int i = 0; i < numericalVector.size(); ++i) {
+        cout << numericalVector[i] << (i == numericalVector.size() - 1 ? "" : ", ");
+    }
+    cout << "]\n";
 }
+
+ostream& operator<<(ostream& os, const Event& event) {
+    os << "Event Name: " << event.eventName << "\nDate: " << event.eventDate << "\nTime: " << event.eventTime << "\n";
+    return os;
+}
+
+istream& operator>>(istream& is, Event& event) {
+    cout << "Enter event name: ";
+    is >> event.eventName;
+
+    cout << "Enter event date: ";
+    is >> event.eventDate;
+
+    cout << "Enter event time: ";
+    is >> event.eventTime;
+
+
+
+    return is;
+}
+
+Event& Event::operator=(const Event& other) {
+    if (this != &other) {
+        eventName = other.eventName;
+        eventDate = other.eventDate;
+        eventTime = other.eventTime;
+        setEventDescription(other.eventDescription ? *other.eventDescription : "");
+        numericalVector = other.numericalVector;
+    }
+    return *this;
+}
+
+int Event::operator[](int index) const {
+    if (index >= 0 && index < numericalVector.size()) {
+        return numericalVector[index];
+    }
+    else {
+        throw out_of_range("Index out of range.");
+    }
+}
+
+Event Event::operator+(const Event& other) const {
+    Event result = *this;
+    
+    return result;
+}
+
+
+Event& Event::operator++() {
+
+    ++staticArray[0];
+    return *this;
+}
+
+
+Event Event::operator++(int) {
+    Event temp = *this;  
+
+    staticArray[0]++;
+    return temp;  
+}
+
+
+Event::operator bool() const {
+
+    return !eventName.empty();
+}
+
+
+bool Event::operator!() const {
+
+    return eventName.empty();
+}
+
+
+bool Event::operator<(const Event& other) const {
+
+    return eventName < other.eventName;
+}
+
+
+bool Event::operator==(const Event& other) const {
+
+    return eventName == other.eventName &&
+        eventDate == other.eventDate &&
+        eventTime == other.eventTime;
+}
+
+
+//----------------------------------------------------------------------------------------------------------
+
+class Ticket {
+private:
+    static int ticketIDCounter;
+    int ticketID;
+    string ticketType;
+    double ticketPrice;
+    bool isBooked;
+    char* ticketDescription;  
+    static const int staticArraySize = 5;
+    int staticArray[staticArraySize];
+    vector<int> numericalVector;
+
+public:
+
+    Ticket(const string& type, double price);
+    Ticket(const Ticket& other);
+    ~Ticket();
+
+
+    void setTicketType(const string& type);
+    void setTicketPrice(double price);
+    void bookTicket();
+    void setTicketDescription(const string& description);  
+
+
+    int getTicketID() const;
+    string getTicketType() const;
+    double getTicketPrice() const;
+    bool isTicketBooked() const;
+    string getTicketDescription() const;  
+
+
+    void displayTicketInfo() const;
+
+
+    Ticket& operator=(const Ticket& other);
+    int operator[](int index) const;
+    Ticket operator+(const Ticket& other) const;
+    Ticket& operator++();
+    Ticket operator++(int);
+    explicit operator bool() const;
+    bool operator!() const;
+    bool operator<(const Ticket& other) const;
+    bool operator==(const Ticket& other) const;
+
+
+    friend ostream& operator<<(ostream& os, const Ticket& ticket);
+    friend istream& operator>>(istream& is, Ticket& ticket);
+};
+
+// Initialize static member
+int Ticket::ticketIDCounter = 1000;
 
 // Implementation of Ticket class
 Ticket::Ticket(const string& type, double price)
-    : ticketID(ticketIDCounter++), ticketType(type), ticketPrice(price), isBooked(false) {}
+    : ticketID(ticketIDCounter++), ticketType(type), ticketPrice(price), isBooked(false),
+    ticketDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {}
 
 Ticket::Ticket(const Ticket& other)
-    : ticketID(other.ticketID), ticketType(other.ticketType), ticketPrice(other.ticketPrice), isBooked(other.isBooked) {}
+    : ticketID(other.ticketID), ticketType(other.ticketType), ticketPrice(other.ticketPrice),
+    isBooked(other.isBooked), ticketDescription(nullptr), staticArray{ 1, 2, 3, 4, 5 } {
+    setTicketDescription(other.ticketDescription ? other.ticketDescription : "");
+    numericalVector = other.numericalVector;
+}
 
-Ticket::~Ticket() {}
+Ticket::~Ticket() {
+    delete[] ticketDescription;
+}
 
 void Ticket::setTicketType(const string& type) {
     ticketType = type;
@@ -268,9 +562,39 @@ bool Ticket::isTicketBooked() const {
     return isBooked;
 }
 
+void Ticket::setTicketDescription(const string& description) {
+    if (ticketDescription == nullptr) {
+        ticketDescription = new char[description.length() + 1];
+        strcpy(ticketDescription, description.c_str());
+    }
+    else {
+        delete[] ticketDescription;
+        ticketDescription = new char[description.length() + 1];
+        strcpy(ticketDescription, description.c_str());
+    }
+}
+
+string Ticket::getTicketDescription() const {
+    return ticketDescription ? string(ticketDescription) : "";
+}
+
 void Ticket::displayTicketInfo() const {
     cout << "Ticket ID: " << ticketID << "\nType: " << ticketType << "\nPrice: $" << ticketPrice
         << "\nStatus: " << (isBooked ? "Booked" : "Available") << "\n";
+
+    cout << "Static Array: [";
+    for (int i = 0; i < staticArraySize; ++i) {
+        cout << staticArray[i] << (i == staticArraySize - 1 ? "" : ", ");
+    }
+    cout << "]\n";
+
+    cout << "Numerical Vector: [";
+    for (int i = 0; i < numericalVector.size(); ++i) {
+        cout << numericalVector[i] << (i == numericalVector.size() - 1 ? "" : ", ");
+    }
+    cout << "]\n";
+
+    cout << "Description: " << (ticketDescription ? ticketDescription : "N/A") << "\n";
 }
 
 Ticket& Ticket::operator=(const Ticket& other) {
@@ -279,8 +603,64 @@ Ticket& Ticket::operator=(const Ticket& other) {
         ticketType = other.ticketType;
         ticketPrice = other.ticketPrice;
         isBooked = other.isBooked;
+        setTicketDescription(other.ticketDescription ? other.ticketDescription : "");
+        numericalVector = other.numericalVector;
     }
     return *this;
+}
+
+int Ticket::operator[](int index) const {
+    if (index >= 0 && index < numericalVector.size()) {
+        return numericalVector[index];
+    }
+    else {
+        throw out_of_range("Index out of range.");
+    }
+}
+
+Ticket Ticket::operator+(const Ticket& other) const {
+    Ticket result = *this;
+    result.ticketPrice += other.ticketPrice;
+    return result;
+}
+
+Ticket& Ticket::operator++() {
+
+    if (!numericalVector.empty()) {
+        ++numericalVector[0];
+    }
+    return *this;
+}
+
+Ticket Ticket::operator++(int) {
+    Ticket temp = *this;
+
+    if (!numericalVector.empty()) {
+        numericalVector[0]++;
+    }
+    return temp;
+}
+
+Ticket::operator bool() const {
+
+    return isBooked;
+}
+
+bool Ticket::operator!() const {
+
+    return !isBooked;
+}
+
+bool Ticket::operator<(const Ticket& other) const {
+
+    return ticketPrice < other.ticketPrice;
+}
+
+bool Ticket::operator==(const Ticket& other) const {
+    return ticketID == other.ticketID && ticketType == other.ticketType &&
+        ticketPrice == other.ticketPrice && isBooked == other.isBooked &&
+        numericalVector == other.numericalVector &&
+        (strcmp(ticketDescription ? ticketDescription : "", other.ticketDescription ? other.ticketDescription : "") == 0);
 }
 
 ostream& operator<<(ostream& os, const Ticket& ticket) {
@@ -296,59 +676,26 @@ istream& operator>>(istream& is, Ticket& ticket) {
     cout << "Enter ticket price: $";
     is >> ticket.ticketPrice;
 
-    ticket.isBooked = false; // New ticket is initially not booked
+    ticket.isBooked = false; 
+
+    cout << "Enter ticket description: ";
+    string description;
+    is.ignore();  
+    getline(is, description);
+    ticket.setTicketDescription(description);
+
+    cout << "Enter numerical vector (space-separated values): ";
+    int value;
+    while (is >> value) {
+        ticket.numericalVector.push_back(value);
+    }
 
     return is;
 }
 
-bool Ticket::operator==(const Ticket& other) const {
-    return (ticketID == other.ticketID) && (ticketType == other.ticketType) &&
-        (ticketPrice == other.ticketPrice) && (isBooked == other.isBooked);
-}
+
+//-----------------------------------------------------------------------------------
 
 int main() {
-    // Seed for random ID generation
-    srand(time(0));
-
-    Location myLocation("Stadium A", 500, 10, 50);
-    Event myEvent("Football Match", "2023-12-01", "18:00");
-
-    myLocation.displayLocationInfo();
-    myEvent.displayEventInfo();
-
-    int numTickets;
-    cout << "Enter the number of tickets to generate: ";
-    cin >> numTickets;
-
-    vector<Ticket> tickets;
-    for (int i = 0; i < numTickets; ++i) {
-        Ticket newTicket("Regular", 30.0); // Default type and price
-        tickets.push_back(newTicket);
-    }
-
-    cout << "\nGenerated Tickets:\n";
-    for (const Ticket& ticket : tickets) {
-        cout << ticket;
-    }
-
-    int ticketToBook;
-    cout << "\nEnter the ticket ID to book: ";
-    cin >> ticketToBook;
-
-    // Validate the input ticket ID
-    for (Ticket& ticket : tickets) {
-        if (ticket.getTicketID() == ticketToBook) {
-            ticket.bookTicket();
-            cout << "Ticket booked successfully.\n";
-            break;
-        }
-    }
-
-    // Display updated information about the booked ticket
-    cout << "\nUpdated Tickets:\n";
-    for (const Ticket& ticket : tickets) {
-        cout << ticket;
-    }
-
-    return 0;
+    
 }
