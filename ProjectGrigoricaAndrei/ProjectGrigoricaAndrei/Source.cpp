@@ -68,7 +68,7 @@ Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPe
 Location::Location(const Location& other)
     : venueName(other.venueName), maxSeats(other.maxSeats), numRows(other.numRows), numSeatsPerRow(other.numSeatsPerRow) {}
 
-
+//testing changes
 
 void Location::setVenueName(const string& name) {
     venueName = name;
