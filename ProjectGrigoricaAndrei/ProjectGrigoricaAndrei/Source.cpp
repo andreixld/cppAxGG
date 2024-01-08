@@ -13,7 +13,7 @@
         virtual ~AbstractEntity() = default;  // Virtual destructor for proper polymorphic behavior
     };
 
-    class Location {
+    class Location : public AbstractEntity {
     private:
         string venueName;
         int maxSeats;
@@ -64,6 +64,16 @@
         bool operator==(const Location& other) const;
 
         void displayLocationInfo() const;
+
+
+        int generateRandomID() override {
+            static bool seedInitialized = false;
+            if (!seedInitialized) {
+                srand(static_cast<unsigned>(time(nullptr)));
+                seedInitialized = true;
+            }
+            return rand();
+        }
     };
 
     // Implementation of Location class
@@ -303,7 +313,7 @@
 
     //-----------------------------------------------------------------------------------------------------------------------------------------
 
-    class Event {
+    class Event : public AbstractEntity {
     private:
         string eventName;
         string eventDate;
@@ -351,6 +361,16 @@
 
 
         void displayEventInfo() const;
+
+
+        int generateRandomID() override {
+            static bool seedInitialized = false;
+            if (!seedInitialized) {
+                srand(static_cast<unsigned>(time(nullptr)));
+                seedInitialized = true;
+            }
+            return rand();
+        }
     };
 
     // Implementation of Event class
@@ -519,7 +539,7 @@
 
     //----------------------------------------------------------------------------------------------------------
 
-    class Ticket {
+    class Ticket : public AbstractEntity {
     private:
         static int ticketIDCounter;
         int ticketID;
@@ -575,6 +595,15 @@
 
         friend ostream& operator<<(ostream& os, const Ticket& ticket);
         friend istream& operator>>(istream& is, Ticket& ticket);
+
+        int generateRandomID() override {
+            static bool seedInitialized = false;
+            if (!seedInitialized) {
+                srand(static_cast<unsigned>(time(nullptr)));
+                seedInitialized = true;
+            }
+            return rand();
+        }
     };
 
     // Initialize static member
