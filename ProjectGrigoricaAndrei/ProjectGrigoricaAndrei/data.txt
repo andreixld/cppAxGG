@@ -1,0 +1,6 @@
+﻿Location|New York|100|10|10|DefaultType|50.0|VenueDescription
+Location|London|150|12|8|Premium|60.0|AnotherDescription
+Event|Concert|2024-01-10|19:30|EventDescription
+Event|Conference|2024-02-15|14:00|AnotherEventDescription
+Ticket|VIP|100.0|1|VIP Ticket Description
+Ticket|Regular|50.0|0|Regular Ticket Description

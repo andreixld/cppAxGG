@@ -3,6 +3,10 @@
     #include <iostream>
     #include <vector>
     #include <string>
+    #include <array>
+    #include <memory>
+    #include <fstream>
+    #include <limits>
 
     using namespace std;
 
@@ -83,34 +87,6 @@
     Location::Location(const Location& other)
         : venueName(other.venueName), maxSeats(other.maxSeats), numRows(other.numRows), numSeatsPerRow(other.numSeatsPerRow) {}
 
-    /*
-
-    The program can receive as a parameter in the command line mode of operation: if it uses a menu in the console or processes a text file with all input data (example: if the application is called oop.exe, then can be launched in execution in the following way: oop.exe data.txt, in which case it will process the data from the file received as a parameter)
-
-    The application can process data from a text file and will display the results on the console according to the above
-
-    The application will use binary files to save tickets issued to date; when restarting the application the data will be restored
-
-    All entities needed to implement the above functionality will be added to the existing classes (or new classes related to the project can be defined)
-
-    A menu will be implemented to help the user navigate through the different functionalities
-
-    At least a new class will be created by deriving an existing class
-
-    The application will contain at least one abstract class (can be interface) containing at least one pure virtual method. The pure method will be overdefined in a derived class.
-
-    Existing classes will have at least 2 virtual methods other than pure virtual ones. Methods will be overdefined by derived classes.
-
-    At least one STL class will be used in one of the existing classes
-
-    The application must work turnkey (once started it will not require any further changes to the source code to expose all the functionality)
-
-    This phase is considered implemented if at least 75% of the requirements are implemented
-
-    Changes to the project source code are managed using a Git repository. Is mandatory that students do multiple commits after each class implementation/update. Each commit must contain a short message detailing the changes. If the phase has less than 5 commits (in different days), it will not be taken into account.
-
-    */
-
     void Location::setVenueName(const string& name) {
         venueName = name;
     }
@@ -161,6 +137,22 @@
     void Location::displayLocationInfo() const {
         cout << "Venue: " << venueName << "\nMax Seats: " << maxSeats << "\nNumber of Rows: " << numRows
             << "\nSeats Per Row: " << numSeatsPerRow << "\n";
+
+        if (venueDescription != nullptr) {
+            cout << "Description: " << *venueDescription << "\n";
+        }
+
+        cout << "Static Array: [";
+        for (int i = 0; i < staticArraySize; ++i) {
+            cout << staticArray[i] << (i == staticArraySize - 1 ? "" : ", ");
+        }
+        cout << "]\n";
+
+        cout << "Numerical Vector: [";
+        for (int i = 0; i < numericalVector.size(); ++i) {
+            cout << numericalVector[i] << (i == numericalVector.size() - 1 ? "" : ", ");
+        }
+        cout << "]\n";
     }
 
     Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow,
@@ -935,23 +927,31 @@
         return rand();
     }
 
-    Location enterLocationDetails() {
-        Location location;
-        cin >> location;
-        return location;
-    }
 
-    Event enterEventDetails() {
-        Event event;
-        cin >> event;
-        return event;
-    }
 
     //-----------------------------------------------------------------------------------
 
-    int main() {
+    int main(int argc, char* argv[]) {
         Location location;
         Event event;
+
+        if (argc == 2) {
+            const string filename = argv[1];
+            vector<Location> savedLocations = FileHandler::loadEntitiesFromFile<Location>(filename);
+            vector<Event> savedEvents = FileHandler::loadEntitiesFromFile<Event>(filename);
+
+            cout << "Loaded Locations:\n";
+            for (const auto& savedLocation : savedLocations) {
+                savedLocation.displayLocationInfo();
+            }
+
+            cout << "\nLoaded Events:\n";
+            for (const auto& savedEvent : savedEvents) {
+                savedEvent.displayEventInfo();
+            }
+
+            return 0;
+        }
 
         int choice;
         do {
@@ -968,42 +968,45 @@
 
             switch (choice) {
             case 1:
-            {location = enterLocationDetails();
-            break; }
+            {
+                location = enterLocationDetails();
+                break; }
             case 2:
-            { event = enterEventDetails();
-            break; }
+            { 
+                event = enterEventDetails();
+                break; 
+            }
             case 3:
             { 
                 if (!location || !event) {
-                cout << "Please enter location and event details before generating a ticket.\n";
+                cout << "\nPlease enter location and event details before generating a ticket.\n";
                 break;
                 }
                 Ticket ticket = generateNominalTicket(location, event);
-                cout << "Generated Ticket:\n";
+                cout << "\nGenerated Ticket:\n";
                 ticket.displayTicketInfo();
                 break; 
             }
             case 4:
             {
                 if (!location || !event) {
-                cout << "Please enter location and event details before validating a ticket.\n";
+                cout << "\nPlease enter location and event details before validating a ticket.\n";
                 break;
                 }
                 Ticket ticketToValidate;
                 cin >> ticketToValidate;
                 if (validateTicket(ticketToValidate)) {
-                    cout << "Ticket is valid.\n";
+                    cout << "\nTicket is valid.\n";
                 }
                 else {
-                    cout << "Ticket is not valid.\n";
+                    cout << "\nTicket is not valid.\n";
                 }
             break; 
             }
             case 5: {
                 FileHandler::saveEntityToFile("data.txt", location);
                 FileHandler::saveEntityToFile("data.txt", event);
-                cout << "Entities saved to file.\n";
+                cout << "\nEntities saved to file.\n";
                 break;
             }
             case 6: {
@@ -1011,7 +1014,7 @@
                 vector<Event> savedEvents = FileHandler::loadEntitiesFromFile<Event>("data.txt");
 
                 // Display loaded entities
-                cout << "Loaded Locations:\n";
+                cout << "\nLoaded Locations:\n";
                 for (const auto& savedLocation : savedLocations) {
                     savedLocation.displayLocationInfo();
                 }
@@ -1024,7 +1027,7 @@
             }
         
             default:
-                cout << "Invalid choice. Please try again.\n";
+                cout << "\nInvalid choice. Please try again.\n";
             }
 
 
