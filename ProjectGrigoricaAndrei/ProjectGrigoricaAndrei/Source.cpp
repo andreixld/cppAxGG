@@ -895,6 +895,34 @@
 
             return entities;
         }
+
+        template <typename T>
+        static void saveEntityToFile(const string& filename, const T& entity) {
+            ofstream outputFile(filename, ios::binary | ios::app);
+            if (!outputFile.is_open()) {
+                cerr << "Error opening file for writing: " << filename << "\n";
+                return;
+            }
+
+            outputFile.write(reinterpret_cast<const char*>(&entity), sizeof(T));
+        }
+
+        template <typename T>
+        static vector<T> loadEntitiesFromFile(const string& filename) {
+            vector<T> entities;
+            ifstream inputFile(filename, ios::binary);
+            if (!inputFile.is_open()) {
+                cerr << "Error opening file for reading: " << filename << "\n";
+                return entities;
+            }
+
+            T tempEntity;
+            while (inputFile.read(reinterpret_cast<char*>(&tempEntity), sizeof(T))) {
+                entities.push_back(tempEntity);
+            }
+
+            return entities;
+        }
     };
 
 
@@ -931,7 +959,9 @@
                 << "2. Enter event details\n"
                 << "3. Generate nominal ticket\n"
                 << "4. Validate ticket\n"
-                << "5. Exit\n\n";
+                << "5. Save entities to file\n"
+                << "6. Load entities from file\n"
+                << "7. Exit\n\n";
             
             cout << "Enter your choice: ";
             cin >> choice;
@@ -970,27 +1000,28 @@
                 }
             break; 
             }
-            case 5:
-            { cout << "Exiting the program.\n";
-            break; }
-            /*case 6:
-            { 
-                if (location)
-                    cout << location;
-                else {
-                    cout << "There is no location";
+            case 5: {
+                FileHandler::saveEntityToFile("data.txt", location);
+                FileHandler::saveEntityToFile("data.txt", event);
+                cout << "Entities saved to file.\n";
+                break;
+            }
+            case 6: {
+                vector<Location> savedLocations = FileHandler::loadEntitiesFromFile<Location>("data.txt");
+                vector<Event> savedEvents = FileHandler::loadEntitiesFromFile<Event>("data.txt");
+
+                // Display loaded entities
+                cout << "Loaded Locations:\n";
+                for (const auto& savedLocation : savedLocations) {
+                    savedLocation.displayLocationInfo();
+                }
+
+                cout << "\nLoaded Events:\n";
+                for (const auto& savedEvent : savedEvents) {
+                    savedEvent.displayEventInfo();
                 }
                 break;
             }
-            case 7:
-            {
-                if (event)
-                    cout << event;
-                else {
-                    cout << "There is no event";
-                }
-                break;
-            }*/
         
             default:
                 cout << "Invalid choice. Please try again.\n";
@@ -1000,7 +1031,7 @@
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        } while (choice != 5);
+        } while (choice != 7);
 
         return 0;
     }
