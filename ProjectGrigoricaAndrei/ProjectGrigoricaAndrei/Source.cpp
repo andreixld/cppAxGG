@@ -78,9 +78,61 @@
             }
             return rand();
         }
+
+        void serialize(std::ofstream& outputFile) const {
+            // Write individual data members to the file
+            outputFile << venueName << " " << maxSeats << " " << numRows << " " << numSeatsPerRow << " "
+                << defaultTicketType << " " << defaultTicketPrice << " ";
+
+            // Write venue description if available
+            if (venueDescription != nullptr) {
+                outputFile << *venueDescription << " ";
+            }
+            else {
+                outputFile << "null ";
+            }
+
+            // Write staticArray
+            for (int i = 0; i < staticArraySize; ++i) {
+                outputFile << staticArray[i] << " ";
+            }
+
+            // Write numericalVector
+            outputFile << numericalVector.size() << " ";
+            for (int i = 0; i < numericalVector.size(); ++i) {
+                outputFile << numericalVector[i] << " ";
+            }
+        }
+
+        void deserialize(std::ifstream& inputFile) {
+            // Read individual data members from the file
+            inputFile >> venueName >> maxSeats >> numRows >> numSeatsPerRow
+                >> defaultTicketType >> defaultTicketPrice;
+
+            // Read venue description if available
+            string description;
+            inputFile >> description;
+            if (description != "null") {
+                setVenueDescription(description);
+            }
+
+            // Read staticArray
+            for (int i = 0; i < staticArraySize; ++i) {
+                inputFile >> staticArray[i];
+            }
+
+            // Read numericalVector
+            int vectorSize;
+            inputFile >> vectorSize;
+            numericalVector.resize(vectorSize);
+            for (int i = 0; i < vectorSize; ++i) {
+                inputFile >> numericalVector[i];
+            }
+        }
     };
 
     // Implementation of Location class
+
     Location::Location(const string& name, int maxSeats, int numRows, int numSeatsPerRow)
         : venueName(name), maxSeats(maxSeats), numRows(numRows), numSeatsPerRow(numSeatsPerRow) {}
 
@@ -168,6 +220,7 @@
         setDefaultTicketType("Regular");
         setDefaultTicketPrice(30.0);
     }
+
 
     void Location::setDefaultTicketType(const string& defaultType) {
         defaultTicketType = defaultType;
@@ -363,6 +416,56 @@
             }
             return rand();
         }
+
+        void serialize(std::ofstream& outputFile) const {
+            // Write individual data members to the file
+            outputFile << eventName << " " << eventDate << " " << eventTime << " ";
+
+            // Write event description if available
+            if (eventDescription != nullptr) {
+                outputFile << *eventDescription << " ";
+            }
+            else {
+                outputFile << "null ";
+            }
+
+            // Write staticArray
+            for (int i = 0; i < staticArraySize; ++i) {
+                outputFile << staticArray[i] << " ";
+            }
+
+            // Write numericalVector
+            outputFile << numericalVector.size() << " ";
+            for (int i = 0; i < numericalVector.size(); ++i) {
+                outputFile << numericalVector[i] << " ";
+            }
+        }
+
+        void deserialize(std::ifstream& inputFile) {
+            // Read individual data members from the file
+            inputFile >> eventName >> eventDate >> eventTime;
+
+            // Read event description if available
+            string description;
+            inputFile >> description;
+            if (description != "null") {
+                setEventDescription(description);
+            }
+
+            // Read staticArray
+            for (int i = 0; i < staticArraySize; ++i) {
+                inputFile >> staticArray[i];
+            }
+
+            // Read numericalVector
+            int vectorSize;
+            inputFile >> vectorSize;
+            numericalVector.resize(vectorSize);
+            for (int i = 0; i < vectorSize; ++i) {
+                inputFile >> numericalVector[i];
+            }
+        }
+
     };
 
     // Implementation of Event class
@@ -596,6 +699,17 @@
             }
             return rand();
         }
+
+        void serialize(std::ofstream& outputFile) const {
+            // Write individual data members to the file
+            outputFile.write(reinterpret_cast<const char*>(this), sizeof(Ticket));
+        }
+
+        void deserialize(std::ifstream& inputFile) {
+            // Read individual data members from the file
+            inputFile.read(reinterpret_cast<char*>(this), sizeof(Ticket));
+        }
+
     };
 
     // Initialize static member
@@ -859,57 +973,28 @@
     class FileHandler {
     public:
         template <typename T>
-        static void saveToFile(const string& filename, const vector<T>& entities) {
-            ofstream outputFile(filename, ios::binary);
-            if (!outputFile.is_open()) {
-                cerr << "Error opening file for writing: " << filename << "\n";
-                return;
-            }
-
-            for (const auto& entity : entities) {
-                outputFile.write(reinterpret_cast<const char*>(&entity), sizeof(T));
-            }
-        }
-
-        template <typename T>
-        static vector<T> loadFromFile(const string& filename) {
-            vector<T> entities;
-            ifstream inputFile(filename, ios::binary);
-            if (!inputFile.is_open()) {
-                cerr << "Error opening file for reading: " << filename << "\n";
-                return entities;
-            }
-
-            T tempEntity;
-            while (inputFile.read(reinterpret_cast<char*>(&tempEntity), sizeof(T))) {
-                entities.push_back(tempEntity);
-            }
-
-            return entities;
-        }
-
-        template <typename T>
         static void saveEntityToFile(const string& filename, const T& entity) {
-            ofstream outputFile(filename, ios::binary | ios::app);
+            ofstream outputFile(filename, ios::app);
             if (!outputFile.is_open()) {
                 cerr << "Error opening file for writing: " << filename << "\n";
                 return;
             }
 
-            outputFile.write(reinterpret_cast<const char*>(&entity), sizeof(T));
+            entity.serialize(outputFile);
         }
 
         template <typename T>
         static vector<T> loadEntitiesFromFile(const string& filename) {
             vector<T> entities;
-            ifstream inputFile(filename, ios::binary);
+            ifstream inputFile(filename);
             if (!inputFile.is_open()) {
                 cerr << "Error opening file for reading: " << filename << "\n";
                 return entities;
             }
 
             T tempEntity;
-            while (inputFile.read(reinterpret_cast<char*>(&tempEntity), sizeof(T))) {
+            while (!inputFile.eof()) {
+                tempEntity.deserialize(inputFile);
                 entities.push_back(tempEntity);
             }
 
@@ -949,6 +1034,21 @@
             for (const auto& savedEvent : savedEvents) {
                 savedEvent.displayEventInfo();
             }
+
+            // Saving Event to file
+            Event myEvent;
+            ofstream outputFile("event_data.dat", ios::binary);
+            myEvent.serialize(outputFile);
+            outputFile.close();
+
+            // Loading Event from file
+            ifstream inputFile("event_data.dat", ios::binary);
+            Event loadedEvent;
+            loadedEvent.deserialize(inputFile);
+            inputFile.close();
+
+            cout << "\nLoaded and Saved Events:\n";
+            loadedEvent.displayEventInfo();
 
             return 0;
         }
@@ -1013,15 +1113,20 @@
                 vector<Location> savedLocations = FileHandler::loadEntitiesFromFile<Location>("data.txt");
                 vector<Event> savedEvents = FileHandler::loadEntitiesFromFile<Event>("data.txt");
 
-                // Display loaded entities
-                cout << "\nLoaded Locations:\n";
-                for (const auto& savedLocation : savedLocations) {
-                    savedLocation.displayLocationInfo();
+                if (savedLocations.empty() && savedEvents.empty()) {
+                    cout << "\nNo data loaded from file or error reading the file.\n";
                 }
+                else {
+                    // Display loaded entities
+                    cout << "\nLoaded Locations:\n";
+                    for (const auto& savedLocation : savedLocations) {
+                        savedLocation.displayLocationInfo();
+                    }
 
-                cout << "\nLoaded Events:\n";
-                for (const auto& savedEvent : savedEvents) {
-                    savedEvent.displayEventInfo();
+                    cout << "\nLoaded Events:\n";
+                    for (const auto& savedEvent : savedEvents) {
+                        savedEvent.displayEventInfo();
+                    }
                 }
                 break;
             }
